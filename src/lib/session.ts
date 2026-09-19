@@ -69,3 +69,49 @@ export function useSales() {
     },
   };
 }
+
+export type Order = {
+  id: string;
+  createdAt: string;
+  medicineId: string;
+  name: string;
+  qty: number;
+  unitPrice: number;
+  amount: number;
+  patient: string;
+  note: string;
+  status: "Pending" | "Approved" | "Declined";
+  requestedBy: string;
+};
+
+const ORDERS_KEY = "medicore.orders";
+
+const seedOrders: Order[] = [
+  { id: "ORD-2041", createdAt: "2026-09-18", medicineId: "amx500", name: "Amoxicillin 500 mg", qty: 6, unitPrice: 14.9, amount: 89.4, patient: "A. Bekele", note: "3x daily, 7 days", status: "Pending", requestedBy: "Dr. Selam Abera" },
+  { id: "ORD-2042", createdAt: "2026-09-18", medicineId: "ins-gl", name: "Insulin Glargine", qty: 2, unitPrice: 46.2, amount: 92.4, patient: "M. Tesfaye", note: "Cold chain check", status: "Pending", requestedBy: "Dr. Selam Abera" },
+];
+
+export function useOrders() {
+  const [orders, setOrders] = useState<Order[]>(seedOrders);
+
+  useEffect(() => {
+    setOrders(read<Order[]>(ORDERS_KEY, seedOrders));
+    const listener = () => setOrders(read<Order[]>(ORDERS_KEY, seedOrders));
+    listeners.add(listener);
+    return () => { listeners.delete(listener); };
+  }, []);
+
+  return {
+    orders,
+    addOrder: (order: Order) => {
+      const next = [order, ...read<Order[]>(ORDERS_KEY, seedOrders)];
+      write(ORDERS_KEY, next);
+      setOrders(next);
+    },
+    setStatus: (id: string, status: Order["status"]) => {
+      const next = read<Order[]>(ORDERS_KEY, seedOrders).map((item) => (item.id === id ? { ...item, status } : item));
+      write(ORDERS_KEY, next);
+      setOrders(next);
+    },
+  };
+}
