@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, CheckCircle2, ClipboardList, PackagePlus, Receipt, ShieldCheck, ShoppingCart, Sparkles, Stethoscope, X } from "lucide-react";
+import { CheckCircle2, ClipboardList, PackagePlus, Receipt, ShoppingCart, Sparkles, Stethoscope, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { AppShell, GateScreen, StatusBadge } from "@/components/app-shell";
@@ -316,5 +316,3 @@ function OrderStatus({ status }: { status: Order["status"] }) {
 export function Field({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return <label className="grid gap-1.5 text-xs font-medium">{label}<input required className="h-10 rounded-lg border border-input bg-background px-3 text-sm font-normal outline-none transition-shadow focus:ring-2 focus:ring-ring" {...props} /></label>;
 }
-
-export const dashboardIcons = { AlertTriangle, ShieldCheck };
