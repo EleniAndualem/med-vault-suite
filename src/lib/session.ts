@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 
-import { seedSales, type Role, type Sale } from "./pharmacy-data";
+import { medicines, seedSales, type Medicine, type Role, type Sale } from "./pharmacy-data";
 
 const ROLE_KEY = "medicore.role";
 const SALES_KEY = "medicore.sales";
+const INVENTORY_KEY = "medicore.inventory";
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -70,6 +71,37 @@ export function useSales() {
   };
 }
 
+export function useInventory() {
+  const [inventory, setInventory] = useState<Medicine[]>(medicines);
+
+  useEffect(() => {
+    setInventory(read<Medicine[]>(INVENTORY_KEY, medicines));
+    const listener = () => setInventory(read<Medicine[]>(INVENTORY_KEY, medicines));
+    listeners.add(listener);
+    return () => { listeners.delete(listener); };
+  }, []);
+
+  const save = (next: Medicine[]) => {
+    write(INVENTORY_KEY, next);
+    setInventory(next);
+  };
+
+  return {
+    inventory,
+    addMedicine: (medicine: Medicine) => save([medicine, ...read<Medicine[]>(INVENTORY_KEY, medicines)]),
+    updateMedicine: (medicine: Medicine) => save(read<Medicine[]>(INVENTORY_KEY, medicines).map((item) => item.id === medicine.id ? medicine : item)),
+    removeMedicine: (id: string) => save(read<Medicine[]>(INVENTORY_KEY, medicines).filter((item) => item.id !== id)),
+  };
+}
+
+export type OrderItem = {
+  medicineId: string;
+  name: string;
+  qty: number;
+  unitPrice: number;
+  amount: number;
+};
+
 export type Order = {
   id: string;
   createdAt: string;
@@ -82,6 +114,9 @@ export type Order = {
   note: string;
   status: "Pending" | "Approved" | "Declined";
   requestedBy: string;
+  items?: OrderItem[];
+  paymentMethod?: "Cash" | "Card";
+  paidAt?: string;
 };
 
 const ORDERS_KEY = "medicore.orders";
@@ -110,6 +145,11 @@ export function useOrders() {
     },
     setStatus: (id: string, status: Order["status"]) => {
       const next = read<Order[]>(ORDERS_KEY, seedOrders).map((item) => (item.id === id ? { ...item, status } : item));
+      write(ORDERS_KEY, next);
+      setOrders(next);
+    },
+    markPaid: (id: string, paymentMethod: "Cash" | "Card") => {
+      const next = read<Order[]>(ORDERS_KEY, seedOrders).map((item) => item.id === id ? { ...item, status: "Approved" as const, paymentMethod, paidAt: new Date().toISOString() } : item);
       write(ORDERS_KEY, next);
       setOrders(next);
     },

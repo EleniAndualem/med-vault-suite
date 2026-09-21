@@ -9,5 +9,5 @@
 - [ ] Modern cart-style pharmacist ordering flow
 - [ ] Cashier in-person payment confirmation before approval
 - [ ] Clarify prescription fulfillment purpose
-- [ ] Remove supplier-related stock-manager UI
+- [x] Remove supplier-related stock-manager UI
 - [ ] Stock manager medicine CRUD operations

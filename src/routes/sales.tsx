@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 
 import { AppShell, GateScreen } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { medicines, money, roleDetails } from "@/lib/pharmacy-data";
-import { useSales, useSession } from "@/lib/session";
+import { money, roleDetails } from "@/lib/pharmacy-data";
+import { useInventory, useSales, useSession } from "@/lib/session";
 
 export const Route = createFileRoute("/sales")({
   head: () => ({
@@ -24,12 +24,13 @@ export const Route = createFileRoute("/sales")({
 function SalesPage() {
   const session = useSession();
   const { sales, addSale, removeSale } = useSales();
-  const [medicineId, setMedicineId] = useState(medicines[0]!.id);
+  const { inventory } = useInventory();
+  const [medicineId, setMedicineId] = useState("");
   const [qty, setQty] = useState(1);
   const [date, setDate] = useState("2026-09-18");
   const [notice, setNotice] = useState("");
 
-  const selected = medicines.find((item) => item.id === medicineId)!;
+  const selected = inventory.find((item) => item.id === medicineId) ?? inventory[0];
   const totals = useMemo(() => {
     const revenue = sales.reduce((sum, item) => sum + item.amount, 0);
     const units = sales.reduce((sum, item) => sum + item.qty, 0);
@@ -58,6 +59,7 @@ function SalesPage() {
             className="mt-4 grid gap-3 sm:grid-cols-[1fr_120px_160px_auto] sm:items-end"
             onSubmit={(event) => {
               event.preventDefault();
+              if (!selected) return;
               addSale({ id: `S-${Date.now()}`, date, medicineId: selected.id, name: selected.name, qty, unitPrice: selected.price, amount: +(selected.price * qty).toFixed(2), cashier: roleDetails.Cashier.user });
               setQty(1);
               setNotice(`Recorded ${qty} × ${selected.name}`);
@@ -66,7 +68,7 @@ function SalesPage() {
           >
             <label className="grid gap-1.5 text-xs font-medium">Medicine
               <select value={medicineId} onChange={(event) => setMedicineId(event.target.value)} className="h-10 rounded-lg border border-input bg-background px-3 text-sm font-normal outline-none">
-                {medicines.map((item) => <option key={item.id} value={item.id}>{item.name} — {money(item.price)}</option>)}
+                 {inventory.map((item) => <option key={item.id} value={item.id}>{item.name} — {money(item.price)}</option>)}
               </select>
             </label>
             <label className="grid gap-1.5 text-xs font-medium">Quantity
@@ -75,7 +77,7 @@ function SalesPage() {
             <label className="grid gap-1.5 text-xs font-medium">Date
               <input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="h-10 rounded-lg border border-input bg-background px-3 text-sm font-normal outline-none" />
             </label>
-            <Button type="submit">Add sale · {money(selected.price * qty)}</Button>
+            <Button type="submit" disabled={!selected}>Add sale · {money((selected?.price ?? 0) * qty)}</Button>
           </form>
         </section>
       ) : (

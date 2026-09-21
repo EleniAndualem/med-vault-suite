@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, Bell, Boxes, ClipboardList, FileChartColumn, LayoutDashboard, LogOut, Menu, PackagePlus, Pill, Receipt, Search, Settings, ShieldCheck, ShoppingCart, Stethoscope, Truck, X } from "lucide-react";
+import { AlertTriangle, Bell, Boxes, ClipboardList, FileChartColumn, LayoutDashboard, LogOut, Menu, Pill, Receipt, Search, Settings, ShieldCheck, ShoppingCart, Stethoscope, X } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -113,7 +113,7 @@ function Sidebar({ role, active, mobileNav, onClose, onSignOut }: { role: Role; 
     [Receipt, "Sales", "/sales"],
     ...(role === "Pharmacist" ? ([[Stethoscope, "Prescriptions", "/"], [ClipboardList, "My orders", "/"]] as Array<[typeof Pill, string, string]>) : []),
     ...(role === "Cashier" ? ([[ClipboardList, "Approvals", "/"]] as Array<[typeof Pill, string, string]>) : []),
-    ...(role === "Stock Manager" ? ([[Pill, "Inventory", "/"], [Truck, "Suppliers", "/"], [PackagePlus, "Stock intake", "/"]] as Array<[typeof Pill, string, string]>) : []),
+    ...(role === "Stock Manager" ? ([[Pill, "Medicines", "/"]] as Array<[typeof Pill, string, string]>) : []),
     [FileChartColumn, "Reports", "/"],
   ];
 
