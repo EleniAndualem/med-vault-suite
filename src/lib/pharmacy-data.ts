@@ -45,6 +45,14 @@ export function statusOf(item: Medicine): Status {
   return "In stock";
 }
 
+export function getStockSummary(items: Medicine[]) {
+  return {
+    stockValue: items.reduce((sum, item) => sum + item.qty * item.cost, 0),
+    lowStockItems: items.filter((item) => statusOf(item) === "Low stock"),
+    expiringItems: items.filter((item) => statusOf(item) === "Expiring"),
+  };
+}
+
 export const stockValue = medicines.reduce((sum, item) => sum + item.qty * item.cost, 0);
 export const lowStockItems = medicines.filter((item) => statusOf(item) === "Low stock");
 export const expiringItems = medicines.filter((item) => statusOf(item) === "Expiring");
@@ -61,7 +69,8 @@ export type Sale = {
 };
 
 function sale(id: string, date: string, medicineId: string, qty: number, cashier = "Naomi Haile"): Sale {
-  const item = medicines.find((m) => m.id === medicineId)!;
+  const item = medicines.find((m) => m.id === medicineId);
+  if (!item) throw new Error(`Unknown medicine: ${medicineId}`);
   return { id, date, medicineId, name: item.name, qty, unitPrice: item.price, amount: +(item.price * qty).toFixed(2), cashier };
 }
 
@@ -94,7 +103,7 @@ export const roleDetails: Record<Role, { user: string; greeting: string; summary
   "Stock Manager": {
     user: "Yared Mekonnen",
     greeting: "Inventory control overview",
-    summary: "Monitor stock value, reorder thresholds, incoming supply, and batch expiry.",
+    summary: "Add, update, count, price, and remove medicines while monitoring reorder thresholds and batch expiry.",
   },
 };
 
